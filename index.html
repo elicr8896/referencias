@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referencias de derivadas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,500;0,600;1,400&display=swap">
+<style>
+  /* Layout: una columna de lectura de 760px; cada referencia es una fila numerada con su idioma y para qué se usó. */
+  :root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --fg: #1b2430;
+    --muted: #586474;
+    --line: #d8dee5;
+    --accent: #1d5ea8;
+    --accent-soft: #e3edf8;
+    --on-accent: #ffffff;
+    --font-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12171d;
+      --surface: #19212a;
+      --fg: #e5eaf0;
+      --muted: #9aa7b6;
+      --line: #2a3541;
+      --accent: #7db3ee;
+      --accent-soft: #1d2c3d;
+      --on-accent: #0e1a28;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12171d;
+    --surface: #19212a;
+    --fg: #e5eaf0;
+    --muted: #9aa7b6;
+    --line: #2a3541;
+    --accent: #7db3ee;
+    --accent-soft: #1d2c3d;
+    --on-accent: #0e1a28;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: light; }
+  body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    padding-block: 40px 56px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+  header { display: flex; flex-direction: column; gap: 10px; }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(30px, 6vw, 40px);
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .lead { margin: 0; color: var(--muted); max-width: 65ch; }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+  .seg button {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+  .seg button:hover:not([aria-pressed="true"]) { background: var(--accent-soft); color: var(--fg); }
+
+  .copy {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .copy:hover { background: var(--accent-soft); }
+  button:focus-visible, a:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .status { font-size: 13px; color: var(--muted); margin: -12px 0 0; min-height: 1.5em; }
+
+  ol.refs { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  ol.refs li {
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 4px 14px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    padding-top: 3px;
+  }
+  .body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .org { font-size: 14px; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+  .title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.35;
+    margin: 0;
+    text-wrap: pretty;
+  }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 2px; }
+  .lang {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .link {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+  .link:hover { text-decoration-thickness: 2px; }
+  .used { font-size: 14px; margin: 4px 0 0; color: var(--fg); }
+  .used b { font-weight: 600; }
+
+  #fallback {
+    width: 100%;
+    min-height: 160px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--fg);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  footer { font-size: 13px; color: var(--muted); max-width: 65ch; margin: 0; }
+
+  @media (max-width: 480px) {
+    ol.refs li { grid-template-columns: 1.9rem minmax(0, 1fr); gap: 4px 10px; }
+    .title { font-size: 17px; }
+  }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">Cálculo diferencial</p>
+    <h1>Referencias</h1>
+    <p class="lead">Fuentes consultadas para el trabajo «Criterio de la primera y segunda derivada». La numeración es la misma que en el documento.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Filtrar por idioma">
+      <button type="button" data-f="all" aria-pressed="true" id="f-all">Todas</button>
+      <button type="button" data-f="es" aria-pressed="false" id="f-es">Español</button>
+      <button type="button" data-f="en" aria-pressed="false" id="f-en">English</button>
+    </div>
+    <button type="button" class="copy" id="copy">Copiar referencias</button>
+  </div>
+  <p class="status" id="status" role="status" aria-live="polite"></p>
+
+  <textarea id="fallback" hidden readonly aria-label="Referencias en texto para copiar"></textarea>
+
+  <ol class="refs" id="refs">
+    <li data-lang="es" data-cite="1. Universidad de Guanajuato. Criterios de la primera y segunda derivada (recurso de Cálculo). https://oa.ugto.mx/recurso/wp-content/uploads/2020/10/oa-rg-0006558.pdf">
+      <span class="num">1</span>
+      <div class="body">
+        <p class="org">Universidad de Guanajuato</p>
+        <p class="title">Criterios de la primera y segunda derivada (recurso de Cálculo)</p>
+        <div class="meta"><span class="lang">Español</span><a class="link" href="https://oa.ugto.mx/recurso/wp-content/uploads/2020/10/oa-rg-0006558.pdf" target="_blank" rel="noopener">oa.ugto.mx</a></div>
+        <p class="used"><b>Se usó para:</b> enunciado de ambos criterios y el ejemplo de x⁴ + 2x³ + 1.</p>
+      </div>
+    </li>
+    <li data-lang="es" data-cite="2. Universidad de Guanajuato. Clase digital 15: Criterio de la segunda derivada (Máximos y mínimos). https://blogs.ugto.mx/rea/clase-digital-15-criterio-de-la-segunda-derivada-maximos-y-minimos/">
+      <span class="num">2</span>
+      <div class="body">
+        <p class="org">Universidad de Guanajuato</p>
+        <p class="title">Clase digital 15: Criterio de la segunda derivada (Máximos y mínimos)</p>
+        <div class="meta"><span class="lang">Español</span><a class="link" href="https://blogs.ugto.mx/rea/clase-digital-15-criterio-de-la-segunda-derivada-maximos-y-minimos/" target="_blank" rel="noopener">blogs.ugto.mx</a></div>
+        <p class="used"><b>Se usó para:</b> relación entre el signo de f'' y los máximos, mínimos e inflexiones.</p>
+      </div>
+    </li>
+    <li data-lang="es" data-cite="3. Monroy Kuhn, M. (2022). Funciones crecientes y decrecientes. Criterio de la primera derivada. GeoGebra. https://mat.geogebra.org/m/ntmg9uva">
+      <span class="num">3</span>
+      <div class="body">
+        <p class="org">Monroy Kuhn, M. (2022) · GeoGebra</p>
+        <p class="title">Funciones crecientes y decrecientes. Criterio de la primera derivada</p>
+        <div class="meta"><span class="lang">Español</span><a class="link" href="https://mat.geogebra.org/m/ntmg9uva" target="_blank" rel="noopener">mat.geogebra.org</a></div>
+        <p class="used"><b>Se usó para:</b> estrategia con valores de prueba y tabla de signos de f'.</p>
+      </div>
+    </li>
+    <li data-lang="es" data-cite="4. Platzi. ¿Qué es un máximo y un mínimo? Curso de Cálculo Diferencial. https://platzi.com/cursos/calculo-diferencial-ds/que-es-un-maximo-y-un-minimo/">
+      <span class="num">4</span>
+      <div class="body">
+        <p class="org">Platzi</p>
+        <p class="title">¿Qué es un máximo y un mínimo? Curso de Cálculo Diferencial</p>
+        <div class="meta"><span class="lang">Español</span><a class="link" href="https://platzi.com/cursos/calculo-diferencial-ds/que-es-un-maximo-y-un-minimo/" target="_blank" rel="noopener">platzi.com</a></div>
+        <p class="used"><b>Se usó para:</b> idea intuitiva de punto crítico y tangente horizontal.</p>
+      </div>
+    </li>
+    <li data-lang="es" data-cite="5. Universidad Tecnológica Nacional (Argentina). Concavidad, puntos de inflexión y criterio de la derivada tercera. https://frh.cvg.utn.edu.ar/mod/resource/view.php?id=74633">
+      <span class="num">5</span>
+      <div class="body">
+        <p class="org">Universidad Tecnológica Nacional (Argentina)</p>
+        <p class="title">Concavidad, puntos de inflexión y criterio de la derivada tercera</p>
+        <div class="meta"><span class="lang">Español</span><a class="link" href="https://frh.cvg.utn.edu.ar/mod/resource/view.php?id=74633" target="_blank" rel="noopener">frh.cvg.utn.edu.ar</a></div>
+        <p class="used"><b>Se usó para:</b> concavidad y criterio de la tercera derivada o de orden superior.</p>
+      </div>
+    </li>
+    <li data-lang="es" data-cite="6. Universidad Nacional de Cuyo. Ochoa, P. D. Análisis Matemático I, Clase 10: Criterio de la derivada primera para extremos. Concavidad. Puntos de inflexión. https://aulaabierta.ingenieria.uncuyo.edu.ar/mod/resource/view.php?id=126006">
+      <span class="num">6</span>
+      <div class="body">
+        <p class="org">Universidad Nacional de Cuyo · Ochoa, P. D.</p>
+        <p class="title">Análisis Matemático I, Clase 10: Criterio de la derivada primera para extremos. Concavidad. Puntos de inflexión</p>
+        <div class="meta"><span class="lang">Español</span><a class="link" href="https://aulaabierta.ingenieria.uncuyo.edu.ar/mod/resource/view.php?id=126006" target="_blank" rel="noopener">aulaabierta.ingenieria.uncuyo.edu.ar</a></div>
+        <p class="used"><b>Se usó para:</b> notación de la segunda derivada y definición de punto de inflexión.</p>
+      </div>
+    </li>
+    <li data-lang="es" data-cite="7. CCH, UNAM. Unidad 4: Conceptos clave (Cálculo diferencial). https://portalacademico.cch.unam.mx/materiales/prof/matdidac/sitpro/mate/calc/calc1/calculo/U4_ConceptosClave.pdf">
+      <span class="num">7</span>
+      <div class="body">
+        <p class="org">CCH, UNAM</p>
+        <p class="title">Unidad 4: Conceptos clave (Cálculo diferencial)</p>
+        <div class="meta"><span class="lang">Español</span><a class="link" href="https://portalacademico.cch.unam.mx/materiales/prof/matdidac/sitpro/mate/calc/calc1/calculo/U4_ConceptosClave.pdf" target="_blank" rel="noopener">portalacademico.cch.unam.mx</a></div>
+        <p class="used"><b>Se usó para:</b> tabla de decisión del criterio de la primera derivada.</p>
+      </div>
+    </li>
+    <li data-lang="en" data-cite="8. Ikenaga, B. (2018). Concavity and the Second Derivative Test. Millersville University. https://sites.millersville.edu/bikenaga/calculus1/concavity/concavity.html">
+      <span class="num">8</span>
+      <div class="body">
+        <p class="org">Ikenaga, B. (2018) · Millersville University</p>
+        <p class="title">Concavity and the Second Derivative Test</p>
+        <div class="meta"><span class="lang">English</span><a class="link" href="https://sites.millersville.edu/bikenaga/calculus1/concavity/concavity.html" target="_blank" rel="noopener">sites.millersville.edu</a></div>
+        <p class="used"><b>Se usó para:</b> el caso f(x) = x⁴, donde el criterio de la segunda derivada falla.</p>
+      </div>
+    </li>
+    <li data-lang="en" data-cite="9. Harvey Mudd College. Concavity and the Second Derivative Test, HMC Calculus Tutorial. https://math.hmc.edu/calculus/hmc-mathematics-calculus-online-tutorials/single-variable-calculus/second-derivative/">
+      <span class="num">9</span>
+      <div class="body">
+        <p class="org">Harvey Mudd College</p>
+        <p class="title">Concavity and the Second Derivative Test, HMC Calculus Tutorial</p>
+        <div class="meta"><span class="lang">English</span><a class="link" href="https://math.hmc.edu/calculus/hmc-mathematics-calculus-online-tutorials/single-variable-calculus/second-derivative/" target="_blank" rel="noopener">math.hmc.edu</a></div>
+        <p class="used"><b>Se usó para:</b> teoremas de concavidad y de punto de inflexión.</p>
+      </div>
+    </li>
+    <li data-lang="en" data-cite="10. University of Texas at Austin. Concavity, Points of Inflection, and the Second Derivative Test. https://www.ma.utexas.edu/users/m408n/AS/LM4-3-10.html">
+      <span class="num">10</span>
+      <div class="body">
+        <p class="org">University of Texas at Austin</p>
+        <p class="title">Concavity, Points of Inflection, and the Second Derivative Test</p>
+        <div class="meta"><span class="lang">English</span><a class="link" href="https://www.ma.utexas.edu/users/m408n/AS/LM4-3-10.html" target="_blank" rel="noopener">ma.utexas.edu</a></div>
+        <p class="used"><b>Se usó para:</b> el ejemplo f(x) = x³ − 3x² con punto de inflexión en x = 1.</p>
+      </div>
+    </li>
+    <li data-lang="en" data-cite="11. Dolan, R. Derivative Tests Summary. University of Connecticut. https://robert-dolan.scholar.uconn.edu/wp-content/uploads/sites/1419/2018/04/Derivative-Tests-Summary.pdf">
+      <span class="num">11</span>
+      <div class="body">
+        <p class="org">Dolan, R. · University of Connecticut</p>
+        <p class="title">Derivative Tests Summary</p>
+        <div class="meta"><span class="lang">English</span><a class="link" href="https://robert-dolan.scholar.uconn.edu/wp-content/uploads/sites/1419/2018/04/Derivative-Tests-Summary.pdf" target="_blank" rel="noopener">robert-dolan.scholar.uconn.edu</a></div>
+        <p class="used"><b>Se usó para:</b> resumen de cuándo usar cada criterio y estrategia combinada.</p>
+      </div>
+    </li>
+    <li data-lang="en" data-cite="12. Purdue University. MA 161, Lesson 23: What Derivatives Tell Us, Part II. https://www.math.purdue.edu/~msunkula/MA161/F25/Lesson23.html">
+      <span class="num">12</span>
+      <div class="body">
+        <p class="org">Purdue University</p>
+        <p class="title">MA 161, Lesson 23: What Derivatives Tell Us, Part II</p>
+        <div class="meta"><span class="lang">English</span><a class="link" href="https://www.math.purdue.edu/~msunkula/MA161/F25/Lesson23.html" target="_blank" rel="noopener">math.purdue.edu</a></div>
+        <p class="used"><b>Se usó para:</b> comparación de x⁴, −x⁴ y los puntos con f'' = 0.</p>
+      </div>
+    </li>
+    <li data-lang="es" data-cite="13. Camacho (2008). Significados asociados al punto de inflexión. Universidad de los Andes (FUNES). https://funes.uniandes.edu.co/wp-content/uploads/tainacan-items/32454/1213209/CamachoSignificadosALME2008.pdf">
+      <span class="num">13</span>
+      <div class="body">
+        <p class="org">Camacho (2008) · Universidad de los Andes (FUNES)</p>
+        <p class="title">Significados asociados al punto de inflexión</p>
+        <div class="meta"><span class="lang">Español</span><a class="link" href="https://funes.uniandes.edu.co/wp-content/uploads/tainacan-items/32454/1213209/CamachoSignificadosALME2008.pdf" target="_blank" rel="noopener">funes.uniandes.edu.co</a></div>
+        <p class="used"><b>Se usó para:</b> por qué f'' = 0 es necesario pero no suficiente para una inflexión.</p>
+      </div>
+    </li>
+  </ol>
+
+  <footer>
+    Fuentes encontradas mediante búsqueda web el 11 de noviembre de 2026. Se revisaron los fragmentos de cada página.
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var items = Array.prototype.slice.call(document.querySelectorAll("#refs li"));
+    var buttons = Array.prototype.slice.call(document.querySelectorAll(".seg button"));
+    var status = document.getElementById("status");
+    var fallback = document.getElementById("fallback");
+    var current = "all";
+
+    function apply(filter) {
+      current = filter;
+      var shown = 0;
+      items.forEach(function (li) {
+        var ok = filter === "all" || li.getAttribute("data-lang") === filter;
+        li.hidden = !ok;
+        if (ok) shown++;
+      });
+      buttons.forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.getAttribute("data-f") === filter));
+      });
+      status.textContent = "Mostrando " + shown + " de " + items.length + " referencias.";
+      fallback.hidden = true;
+    }
+
+    function visibleText() {
+      return items
+        .filter(function (li) { return !li.hidden; })
+        .map(function (li) { return li.getAttribute("data-cite"); })
+        .join("\n");
+    }
+
+    function showFallback(text) {
+      fallback.value = text;
+      fallback.hidden = false;
+      fallback.focus();
+      fallback.select();
+      status.textContent = "Selecciona el texto y cópialo con tu teclado.";
+    }
+
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () { apply(b.getAttribute("data-f")); });
+    });
+
+    document.getElementById("copy").addEventListener("click", function () {
+      var text = visibleText();
+      try {
+        navigator.clipboard.writeText(text).then(function () {
+          status.textContent = "Referencias copiadas.";
+        }, function () { showFallback(text); });
+      } catch (e) {
+        showFallback(text);
+      }
+    });
+
+    apply(current);
+  })();
+</script>
+
+</body>
+</html>
